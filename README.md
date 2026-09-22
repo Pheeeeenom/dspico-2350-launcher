@@ -80,3 +80,4 @@ Additional licenses may apply to the project. For details, see the `license` dir
 - [@XLuma](https://github.com/XLuma)
 - [@Dartz150](https://github.com/Dartz150)
 - [@lifehackerhansol](https://github.com/lifehackerhansol)
+- [@Pheeeeenom](https://github.com/Pheeeeenom)
