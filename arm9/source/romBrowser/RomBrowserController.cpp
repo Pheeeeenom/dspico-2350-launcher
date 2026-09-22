@@ -28,7 +28,26 @@ void RomBrowserController::NavigateToPath(const TCHAR* name)
 void RomBrowserController::LaunchFile(const FileInfo& fileInfo)
 {
     _triggerFileInfo = FileInfo(fileInfo);
+    _triggerHasDelta = false;
     _stateMachine.Fire(RomBrowserStateTrigger::Launch);
+}
+
+void RomBrowserController::LaunchDelta(const FileInfo& base, const FileInfo& delta)
+{
+    // not wired to the loader yet: the sheet closes and nothing launches
+    LOG_ERROR("Launching %s over %s is not wired up yet\n", delta.GetFileName(), base.GetFileName());
+    HideHackSelect();
+}
+
+void RomBrowserController::ShowHackSelect(const FileInfo& base)
+{
+    _hackSelectBase = FileInfo(base);
+    _stateMachine.Fire(RomBrowserStateTrigger::ShowHackSelect);
+}
+
+void RomBrowserController::HideHackSelect()
+{
+    _stateMachine.Fire(RomBrowserStateTrigger::HideHackSelect);
 }
 
 void RomBrowserController::ShowGameInfo(const FileInfo& fileInfo)

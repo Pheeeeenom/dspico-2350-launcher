@@ -27,6 +27,11 @@ public:
 
     void NavigateToPath(const TCHAR* name) override;
     void LaunchFile(const FileInfo& fileInfo) override;
+    void LaunchDelta(const FileInfo& base, const FileInfo& delta) override;
+    void ShowHackSelect(const FileInfo& base) override;
+    void HideHackSelect() override;
+    const FileInfo& GetHackSelectBase() const override { return _hackSelectBase; }
+    const NdzDeltaIndex* GetNdzDeltaIndex() const override { return _ndzDeltaIndex.get(); }
     void ShowGameInfo(const FileInfo& fileInfo) override;
     void HideGameInfo() override;
     void ShowDisplaySettings() override;
@@ -69,6 +74,10 @@ private:
     TCHAR _navigatePath[256];
     TCHAR* _navigateFileName;
     FileInfo _triggerFileInfo;
+    /// @brief Delta launched on top of _triggerFileInfo when _triggerHasDelta is set.
+    FileInfo _triggerDeltaFileInfo;
+    bool _triggerHasDelta = false;
+    FileInfo _hackSelectBase;
     std::unique_ptr<NdzDeltaIndex> _ndzDeltaIndex;
     std::unique_ptr<NdzDeltaIndex> _newNdzDeltaIndex;
     QueueTask<void> _navigateTask;

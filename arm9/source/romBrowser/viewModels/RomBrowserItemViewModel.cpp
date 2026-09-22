@@ -13,6 +13,11 @@ void RomBrowserItemViewModel::Activate()
         {
             _romBrowserController->NavigateToPath(item.GetFileName());
         }
+        else if (item.GetNdzHackCount() > 0)
+        {
+            // base .ndz with rom hacks attached: pick which version to play
+            _romBrowserController->ShowHackSelect(item);
+        }
         else
         {
             _romBrowserController->LaunchFile(item);

@@ -21,6 +21,7 @@
 #include "romBrowser/Theme/Material/MaterialThemeFileIconFactory.h"
 #include "romBrowser/views/NdsGameDetailsBottomSheetView.h"
 #include "romBrowser/views/cheats/CheatsBottomSheetView.h"
+#include "romBrowser/views/hackselect/HackSelectBottomSheetView.h"
 #include "romBrowser/views/DisplaySettingsBottomSheetView.h"
 #include "bgm/AudioStreamPlayer.h"
 #include "bgm/BgmService.h"
@@ -274,6 +275,16 @@ void App::HandleTrigger(RomBrowserStateTrigger trigger, RomBrowserState newState
             HandleHideDisplaySettingsTrigger();
             break;
         }
+        case RomBrowserStateTrigger::ShowHackSelect:
+        {
+            HandleShowHackSelectTrigger();
+            break;
+        }
+        case RomBrowserStateTrigger::HideHackSelect:
+        {
+            HandleHideHackSelectTrigger();
+            break;
+        }
         case RomBrowserStateTrigger::Navigate:
         {
             HandleNavigateTrigger();
@@ -321,6 +332,21 @@ void App::HandleShowDisplaySettingsTrigger()
 }
 
 void App::HandleHideDisplaySettingsTrigger()
+{
+    _dialogPresenter.CloseDialog();
+    if (!_dialogPresenter.GetOldFocus())
+        _romBrowserBottomScreenView->Focus(_focusManager);
+}
+
+void App::HandleShowHackSelectTrigger()
+{
+    auto hackSelectViewModel = SharedPtr<HackSelectViewModel>::MakeShared(&_romBrowserController);
+    auto hackSelectDialog = HackSelectBottomSheetView::CreateShared(
+        std::move(hackSelectViewModel), &_theme->GetMaterialColorScheme(), _theme->GetFontRepository(), &_focusManager);
+    _dialogPresenter.ShowDialog(std::move(hackSelectDialog));
+}
+
+void App::HandleHideHackSelectTrigger()
 {
     _dialogPresenter.CloseDialog();
     if (!_dialogPresenter.GetOldFocus())
