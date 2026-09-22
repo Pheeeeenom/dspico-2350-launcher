@@ -34,9 +34,10 @@ void RomBrowserController::LaunchFile(const FileInfo& fileInfo)
 
 void RomBrowserController::LaunchDelta(const FileInfo& base, const FileInfo& delta)
 {
-    // not wired to the loader yet: the sheet closes and nothing launches
-    LOG_ERROR("Launching %s over %s is not wired up yet\n", delta.GetFileName(), base.GetFileName());
-    HideHackSelect();
+    _triggerFileInfo = FileInfo(base);
+    _triggerDeltaFileInfo = FileInfo(delta);
+    _triggerHasDelta = true;
+    _stateMachine.Fire(RomBrowserStateTrigger::Launch);
 }
 
 void RomBrowserController::ShowHackSelect(const FileInfo& base)
@@ -263,14 +264,49 @@ void RomBrowserController::UpdateLastUsedFilepath()
     _appSettingsService->Save();
 }
 
+void RomBrowserController::BuildCurrentFolderFilePath(const char* fileName, TCHAR* buffer, u32 bufferLength) const
+{
+    buffer[0] = 0;
+    f_getcwd(buffer, bufferLength);
+    int idx = strlcat(buffer, "/", bufferLength);
+    if (idx >= 2 && buffer[idx - 2] == '/')
+        buffer[idx - 1] = 0;
+    strlcat(buffer, fileName, bufferLength);
+}
+
 void RomBrowserController::SetPicoLoaderParams() const
 {
     auto loadParams = pload_getLoadParams();
     loadParams->savePath[0] = 0;
     loadParams->arguments[0] = 0;
     loadParams->argumentsLength = 0;
+    // an older loader would boot the plain base and call it the hack
+    u16 loaderApiVersion = _triggerHasDelta ? pload_readInstalledApiVersion() : 0;
+    if (_triggerHasDelta && loaderApiVersion < 4)
+    {
+        LOG_FATAL("picoLoader7 is API %d, a delta .ndz needs 4.\n", loaderApiVersion);
+        return;
+    }
     if (_triggerFileInfo.GetFileType()->TrySetLaunchParameters(loadParams, _navigatePath))
     {
+        if (_triggerHasDelta)
+        {
+            // romPath is the base; the save belongs to the hack, so it is named after the delta
+            TCHAR deltaPath[256];
+            BuildCurrentFolderFilePath(_triggerDeltaFileInfo.GetFileName(), deltaPath,
+                sizeof(deltaPath) / sizeof(deltaPath[0]));
+            pload_setDeltaPath(deltaPath);
+            StringUtil::Copy(loadParams->savePath, deltaPath, sizeof(loadParams->savePath));
+            char* extension = strrchr(loadParams->savePath, '.');
+            if (!extension)
+                extension = loadParams->savePath + strlen(loadParams->savePath);
+            StringUtil::Copy(extension, ".sav",
+                sizeof(loadParams->savePath) - (extension - loadParams->savePath));
+        }
+        else
+        {
+            pload_setDeltaPath("");
+        }
         gProcessManager.Goto<PicoLoaderProcess>();
     }
     else

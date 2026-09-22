@@ -97,4 +97,5 @@ private:
     void UpdateLastUsedFilepath();
     void SetPicoLoaderParams() const;
     void LoadCheats() const;
+    void BuildCurrentFolderFilePath(const char* fileName, TCHAR* buffer, u32 bufferLength) const;
 };

@@ -3,6 +3,8 @@
 #include <nds/arm9/cache.h>
 #include "core/Environment.h"
 #include <string.h>
+#include <stddef.h>
+#include <memory>
 #include <libtwl/rtos/rtosIrq.h>
 #include <libtwl/mem/memVram.h>
 #include <libtwl/dma/dmaNitro.h>
@@ -20,6 +22,7 @@ typedef void (*pico_loader_9_func_t)(void);
 
 static pload_params_t sLoadParams;
 static char sLauncherPath[256] alignas(32);
+static char sDeltaPath[256] alignas(32);
 static PicoLoaderBootDrive sBootDrive;
 static const pload_cheats_t* sCheatData = nullptr;
 
@@ -36,6 +39,26 @@ void pload_setBootDrive(PicoLoaderBootDrive bootDrive)
 void pload_setLauncherPath(const char* launcherPath)
 {
     StringUtil::Copy(sLauncherPath, launcherPath, sizeof(sLauncherPath));
+}
+
+void pload_setDeltaPath(const char* deltaPath)
+{
+    StringUtil::Copy(sDeltaPath, deltaPath, sizeof(sDeltaPath));
+}
+
+u16 pload_readInstalledApiVersion()
+{
+    // FIL is too big for the IO task's stack
+    auto file = std::make_unique<File>();
+    if (file->Open(PICO_LOADER_7_PATH, FA_OPEN_EXISTING | FA_READ) != FR_OK)
+        return 0;
+    u16 apiVersion;
+    if (file->Seek(offsetof(pload_header7_t, apiVersion)) != FR_OK ||
+        !file->ReadExact(&apiVersion, sizeof(apiVersion)))
+    {
+        return 0;
+    }
+    return apiVersion;
 }
 
 void pload_setCheatData(const pload_cheats_t* cheatData)
@@ -101,6 +124,10 @@ void pload_start()
     if (header->apiVersion >= 3)
     {
         header->v3.cheats = sCheatData;
+    }
+    if (header->apiVersion >= 4)
+    {
+        dma_ntrCopy16(3, &sDeltaPath, &header->v4.deltaPath, sizeof(header->v4.deltaPath));
     }
     mem_setVramCMapping(MEM_VRAM_C_ARM7_00000);
     mem_setVramDMapping(MEM_VRAM_D_ARM7_20000);
