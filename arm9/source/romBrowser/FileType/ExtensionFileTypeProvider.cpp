@@ -2,6 +2,7 @@
 #include <string.h>
 #include "UnknownFileType.h"
 #include "Nds/NdsFileType.h"
+#include "Ndz/NdzFileType.h"
 #include "Gba/GbaFileType.h"
 #include "ExtensionFileTypeProvider.h"
 
@@ -10,6 +11,11 @@ static bool isNdsExtension(const char* extension)
     return !strcasecmp(extension, "nds")
         || !strcasecmp(extension, "srl")
         || !strcasecmp(extension, "dsi");
+}
+
+static bool isNdzExtension(const char* extension)
+{
+    return !strcasecmp(extension, "ndz");
 }
 
 static bool isGbaExtension(const char* extension)
@@ -43,6 +49,11 @@ const FileType* ExtensionFileTypeProvider::GetFileType(const TCHAR* path) const
         if (isNdsExtension(extension))
         {
             return &NdsFileType::sInstance;
+        }
+
+        if (isNdzExtension(extension))
+        {
+            return &NdzFileType::sInstance;
         }
 
         for (u32 i = 0; i < _appSettings.numberOfFileAssociations; i++)

@@ -1,0 +1,22 @@
+#pragma once
+#include "../InternalFileInfo.h"
+#include "../Nds/ndsBanner.h"
+#include "../Nds/NdsFileIcon.h"
+#include "fat/FastFileRef.h"
+
+/// @brief Internal file info for .ndz roms (compressed .nds with front-matter).
+class alignas(32) NdzInternalFileInfo : public InternalFileInfo
+{
+public:
+    explicit NdzInternalFileInfo(const FastFileRef& fastFileRef);
+
+    constexpr const char* GetGameCode() const override { return _gameCode; }
+    const char16_t* GetGameTitle() const override;
+    std::unique_ptr<FileIcon> CreateGameIcon() const override;
+    const nds_banner_t& GetBanner() const { return _banner; }
+
+private:
+    nds_banner_t _banner alignas(32);
+    bool _hasBanner = false;
+    char _gameCode[5];
+};
