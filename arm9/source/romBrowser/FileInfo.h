@@ -19,6 +19,8 @@ public:
             _name = std::move(rhs._name);
             _type = rhs._type;
             _fastFileRef = rhs._fastFileRef;
+            _ndzHackCount = rhs._ndzHackCount;
+            _ndzDelta = rhs._ndzDelta;
         }
 
         return *this;
@@ -39,9 +41,19 @@ public:
     bool IsHidden() const { return _attributes & AM_HID; }
     bool IsSystem() const { return _attributes & AM_SYS; }
 
+    /// @brief .ndz only: number of delta .ndz rom hacks in this folder packed against this base.
+    u8 GetNdzHackCount() const { return _ndzHackCount; }
+    void SetNdzHackCount(u8 count) { _ndzHackCount = count; }
+
+    /// @brief .ndz only: this file is a delta over a base .ndz and is hidden from the listing.
+    bool IsNdzDelta() const { return _ndzDelta; }
+    void SetNdzDelta(bool delta) { _ndzDelta = delta; }
+
 private:
     std::unique_ptr<TCHAR[]> _name;
     const FileType* _type;
     FastFileRef _fastFileRef;
     u8 _attributes;
+    u8 _ndzHackCount = 0;
+    bool _ndzDelta = false;
 };

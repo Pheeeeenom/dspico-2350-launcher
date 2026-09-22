@@ -34,6 +34,7 @@ public:
     /// @brief Gets a pointer to an array with all files in the folder.
     /// @return A pointer to an array with all files in the folder.
     const FileInfo* const* GetFiles() const { return _files; }
+    FileInfo* const* GetFiles() { return _files; }
 
     /// @brief Gets the total number of files in the folder.
     /// @return The total number of files.

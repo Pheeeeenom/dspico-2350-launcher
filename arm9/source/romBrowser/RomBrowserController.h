@@ -12,6 +12,7 @@
 #include "FileType/ExtensionFileTypeProvider.h"
 #include "services/settings/IAppSettingsService.h"
 #include "cheats/ICheatRepository.h"
+#include "NdzDeltaIndex.h"
 
 class RomBrowserController : public IRomBrowserController
 {
@@ -68,6 +69,8 @@ private:
     TCHAR _navigatePath[256];
     TCHAR* _navigateFileName;
     FileInfo _triggerFileInfo;
+    std::unique_ptr<NdzDeltaIndex> _ndzDeltaIndex;
+    std::unique_ptr<NdzDeltaIndex> _newNdzDeltaIndex;
     QueueTask<void> _navigateTask;
     bool _saveSettingsPending = false;
     std::unique_ptr<CoverRepository> _coverRepository;

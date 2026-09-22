@@ -12,3 +12,15 @@
 #define NDZ_OFFSET_FLAGS           0x000C
 #define NDZ_OFFSET_BANNER          0x0010
 #define NDZ_OFFSET_GAMECODE        (NDZ_OFFSET_BANNER + NDZ_BANNER_SLOT_SIZE)
+#define NDZ_OFFSET_HDRCRC          0x2418
+
+#define NDZ_FLAG_DELTA             (1u << 4)
+
+#define NDZ_OFFSET_DELTA_BASE_SIZE    0x2450
+#define NDZ_OFFSET_DELTA_BASE_HDRCRC  0x2454
+#define NDZ_OFFSET_DELTA_NAME         0x2460
+#define NDZ_DELTA_NAME_LEN            64
+#define NDZ_OFFSET_DELTA_VERSION      0x24A0
+#define NDZ_DELTA_VERSION_LEN         32
+// one read from NDZ_OFFSET_GAMECODE covers all the side fields
+#define NDZ_SIDE_FIELDS_END        (NDZ_OFFSET_DELTA_VERSION + NDZ_DELTA_VERSION_LEN)

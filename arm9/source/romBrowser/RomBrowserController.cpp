@@ -191,6 +191,8 @@ void RomBrowserController::HandleNavigateTrigger()
         f_chdir(_navigatePath);
         SdFolderFactory sdFolderFactory { &_fileTypeProvider };
         _newSdFolder = sdFolderFactory.CreateFromPath(".");
+        // join delta .ndz files to their base while the card is ours to read
+        _newNdzDeltaIndex = _newSdFolder ? NdzDeltaIndex::Build(*_newSdFolder) : nullptr;
         u64 endTick = gTickCounter.GetValue();
         LOG_DEBUG("Loading files in folder took: %d us\n", (u32)TickCounter::TicksToMicroSeconds(endTick - startTick));
         return TaskResult<void>::Completed();
@@ -202,6 +204,7 @@ void RomBrowserController::HandleFolderLoadDoneTrigger()
     LOG_DEBUG("RomBrowserStateTrigger::FolderLoadDone\n");
     _romBrowserViewModel.Reset();
     _sdFolder = std::move(_newSdFolder);
+    _ndzDeltaIndex = std::move(_newNdzDeltaIndex); // points into _sdFolder
     _romBrowserViewModel = SharedPtr<RomBrowserViewModel>::MakeShared(this, _navigateFileName);
 }
 

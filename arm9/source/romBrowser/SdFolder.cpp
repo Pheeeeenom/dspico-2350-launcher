@@ -23,8 +23,9 @@ std::unique_ptr<const FileInfo*[]> SdFolder::FilterAndSort(
         const FileInfo* file = _files[i];
         bool isHidden = file->GetFileName()[0] == '.' || file->IsHidden();
         auto classification = file->GetFileType()->GetClassification();
+        // a delta .ndz is listed under its base
         if (classification != FileTypeClassification::Unknown &&
-            (!isHidden || filterSortParams.includeHiddenFiles))
+            (!isHidden || filterSortParams.includeHiddenFiles) && !file->IsNdzDelta())
         {
             sortedFilteredFiles[filteredCount++] = file;
         }
