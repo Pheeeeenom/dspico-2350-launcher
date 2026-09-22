@@ -13,7 +13,7 @@ protected:
     /// @param basePath The base path of the folders.
     void InitializeFolders(const char* basePath);
 
-    /// @brief Gets the cached folder corresponding to the file type suffix name.
+    /// @brief Gets the cached folder for the file type's asset folder name.
     /// @param shortName Suffix folder name (e.g. "nds" or "gba").
     /// @return A pointer to the cached \see SdFolder, or \c nullptr otherwise.
     const SdFolder* GetFileTypeFolder(const char* shortName) const;

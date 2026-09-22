@@ -27,6 +27,10 @@ public:
     /// @return The classification for this file type.
     constexpr FileTypeClassification GetClassification() const { return _classification; }
 
+    /// @brief Returns the folder name under /_pico/covers, /_pico/icons and /_pico/banners for this file type.
+    /// @return The folder name, the short name by default.
+    virtual const char* GetAssetFolderName() const { return _shortName; }
+
     /// @brief Creates a generic file icon for a file of this file type.
     /// @param fileName The name of the file.
     /// @param themeFileIconFactory The theme file icon factory to use.

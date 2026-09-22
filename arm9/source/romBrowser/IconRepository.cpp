@@ -51,7 +51,7 @@ SharedPtr<BmpFileIconData> IconRepository::GetIconForFile(const FileInfo& fileIn
     // Try to get an icon based on an internal game code
     if (!iconFile && gameCode)
     {
-        const auto* iconFolder = GetFileTypeFolder(fileType->GetShortName());
+        const auto* iconFolder = GetFileTypeFolder(fileType->GetAssetFolderName());
         if (iconFolder)
         {
             mini_snprintf(nameBuffer, sizeof(nameBuffer), "%s.bmp", gameCode);

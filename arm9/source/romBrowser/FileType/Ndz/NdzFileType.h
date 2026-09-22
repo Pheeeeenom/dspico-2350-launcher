@@ -16,6 +16,9 @@ public:
         return themeFileIconFactory->CreateNdsFileIcon(fileName);
     }
 
+    /// @brief A .ndz has its .nds game code, so it uses the nds asset folders.
+    const char* GetAssetFolderName() const override { return "nds"; }
+
     InternalFileInfo* CreateInternalFileInfo(const FastFileRef& fastFileRef) const override
     {
         return new NdzInternalFileInfo(fastFileRef);

@@ -58,7 +58,7 @@ InternalFileInfo* BannerRepository::GetBannerForFile(const FileInfo& fileInfo, c
     // Try to get a banner based on an internal game code
     if (!bnrFile && gameCode)
     {
-        const auto* bannerFolder = GetFileTypeFolder(fileType->GetShortName());
+        const auto* bannerFolder = GetFileTypeFolder(fileType->GetAssetFolderName());
         if (bannerFolder)
         {
             mini_snprintf(nameBuffer, sizeof(nameBuffer), "%s.bnr", gameCode);
