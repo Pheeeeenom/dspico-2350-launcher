@@ -12,7 +12,7 @@ class IFontRepository;
 class IVramManager;
 
 /// @brief Bottom sheet listing a base .ndz and its rom hacks. A launches the highlighted
-///        version and B goes back.
+///        version and B goes back. X flips a hack between NTR and TWL mode.
 class HackSelectBottomSheetView : public BottomSheetView
 {
     SHARED_ONLY(HackSelectBottomSheetView)

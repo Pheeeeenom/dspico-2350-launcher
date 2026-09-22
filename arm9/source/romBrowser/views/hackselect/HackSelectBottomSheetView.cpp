@@ -23,14 +23,14 @@ HackSelectBottomSheetView::HackSelectBottomSheetView(SharedPtr<HackSelectViewMod
     const MaterialColorScheme* materialColorScheme, const IFontRepository* fontRepository,
     FocusManager* focusManager)
     : _viewModel(std::move(viewModel))
-    , _titleLabel(Label2DView::CreateShared(128, 16, 25, fontRepository->GetFont(FontType::Medium11)))
+    , _titleLabel(Label2DView::CreateShared(224, 16, 40, fontRepository->GetFont(FontType::Medium11)))
     , _recycler(RecyclerView::CreateShared(
         LIST_X, LIST_Y, LIST_WIDTH, LIST_HEIGHT, RecyclerView::Mode::VerticalList))
     , _materialColorScheme(materialColorScheme)
     , _fontRepository(fontRepository)
     , _focusManager(focusManager)
 {
-    _titleLabel->SetText(u"Versions");
+    _titleLabel->SetText(u"Versions   (X: NTR / TWL mode)");
     AddChildTail(_titleLabel.GetPointer());
     AddChildTail(_recycler.GetPointer());
 }

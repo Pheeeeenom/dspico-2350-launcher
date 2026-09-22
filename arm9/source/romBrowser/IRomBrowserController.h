@@ -30,6 +30,8 @@ public:
     virtual const FileInfo& GetHackSelectBase() const = 0;
     /// @brief Delta .ndz files of the current folder joined to their bases, or nullptr before the first folder load.
     virtual const NdzDeltaIndex* GetNdzDeltaIndex() const = 0;
+    /// @brief Sets whether the rom hack \p delta boots in NTR mode instead of TWL mode. Stored in the delta file's front matter.
+    virtual void SetHackNtrMode(const FileInfo& delta, bool on) = 0;
     virtual void ShowGameInfo(const FileInfo& fileInfo) = 0;
     virtual void HideGameInfo() = 0;
     virtual void ShowDisplaySettings() = 0;

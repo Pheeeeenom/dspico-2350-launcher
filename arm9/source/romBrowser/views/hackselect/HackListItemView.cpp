@@ -9,17 +9,17 @@
 
 #define NAME_LABEL_X       8
 #define NAME_LABEL_Y       5
-#define NAME_LABEL_WIDTH   164
+#define NAME_LABEL_WIDTH   148
 
 #define KIND_LABEL_X       (NAME_LABEL_X + NAME_LABEL_WIDTH + 4)
 #define KIND_LABEL_Y       7
-#define KIND_LABEL_WIDTH   44
+#define KIND_LABEL_WIDTH   60
 
 HackListItemView::HackListItemView(SharedPtr<HackSelectViewModel> viewModel, const VramOffsets& vramOffsets,
     const MaterialColorScheme* materialColorScheme, const IFontRepository* fontRepository)
     : _viewModel(std::move(viewModel))
     , _nameLabel(Label2DView::CreateShared(NAME_LABEL_WIDTH, 16, 96, fontRepository->GetFont(FontType::Regular10)))
-    , _kindLabel(Label2DView::CreateShared(KIND_LABEL_WIDTH, 16, 8, fontRepository->GetFont(FontType::Medium7_5)))
+    , _kindLabel(Label2DView::CreateShared(KIND_LABEL_WIDTH, 16, 12, fontRepository->GetFont(FontType::Medium7_5)))
     , _vramOffsets(vramOffsets)
     , _materialColorScheme(materialColorScheme)
 {
@@ -87,6 +87,12 @@ bool HackListItemView::HandleInput(const InputProvider& inputProvider, FocusMana
     if (inputProvider.Triggered(InputKey::A))
     {
         _viewModel->ActivateItem(_index);
+        return true;
+    }
+    if (inputProvider.Triggered(InputKey::X) && _index > 0)
+    {
+        _viewModel->ToggleNtrMode(_index);
+        SetItem(&_viewModel->GetItem(_index), _index);
         return true;
     }
     return ViewContainer::HandleInput(inputProvider, focusManager);

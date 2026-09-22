@@ -32,6 +32,7 @@ public:
     void HideHackSelect() override;
     const FileInfo& GetHackSelectBase() const override { return _hackSelectBase; }
     const NdzDeltaIndex* GetNdzDeltaIndex() const override { return _ndzDeltaIndex.get(); }
+    void SetHackNtrMode(const FileInfo& delta, bool on) override;
     void ShowGameInfo(const FileInfo& fileInfo) override;
     void HideGameInfo() override;
     void ShowDisplaySettings() override;
@@ -78,6 +79,9 @@ private:
     FileInfo _triggerDeltaFileInfo;
     bool _triggerHasDelta = false;
     FileInfo _hackSelectBase;
+    /// @brief Delta file whose option word the IO thread rewrites, and the state to write.
+    TCHAR _hackOptionPath[256] = { 0 };
+    bool _hackOptionNtrMode = false;
     std::unique_ptr<NdzDeltaIndex> _ndzDeltaIndex;
     std::unique_ptr<NdzDeltaIndex> _newNdzDeltaIndex;
     QueueTask<void> _navigateTask;

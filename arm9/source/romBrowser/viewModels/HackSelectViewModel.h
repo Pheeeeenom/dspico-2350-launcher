@@ -17,6 +17,8 @@ public:
         FileInfo file;
         String<char16_t, 96> name;
         const char* kind;
+        /// @brief Hacks only: boots in NTR mode instead of TWL mode.
+        bool ntrMode = false;
     };
 
     explicit HackSelectViewModel(IRomBrowserController* romBrowserController)
@@ -49,7 +51,8 @@ public:
                 continue;
             auto& item = _items[itemIndex++];
             item.file = FileInfo(*entry.delta);
-            item.kind = "hack";
+            item.ntrMode = entry.ntrMode;
+            item.kind = KindOf(item);
             char16_t name[97];
             StringUtil::Copy(name, entry.label.GetString(), 97);
             item.name = name;
@@ -72,6 +75,17 @@ public:
             _romBrowserController->LaunchDelta(_items[0].file, _items[index].file);
     }
 
+    /// @brief Hacks only: flips NTR / TWL mode and stores it in the delta file.
+    void ToggleNtrMode(int index)
+    {
+        if (index < 1 || (u32)index >= _itemCount)
+            return;
+        auto& item = _items[index];
+        item.ntrMode = !item.ntrMode;
+        item.kind = KindOf(item);
+        _romBrowserController->SetHackNtrMode(item.file, item.ntrMode);
+    }
+
     void Close()
     {
         _romBrowserController->HideHackSelect();
@@ -86,6 +100,11 @@ private:
     static bool IsEntryOf(const NdzDeltaEntry& entry, const FileInfo& base)
     {
         return strcmp(entry.base->GetFileName(), base.GetFileName()) == 0;
+    }
+
+    static const char* KindOf(const Item& item)
+    {
+        return item.ntrMode ? "NTR mode" : "TWL mode";
     }
 
     // first line of the banner title when it is loaded, else the file name

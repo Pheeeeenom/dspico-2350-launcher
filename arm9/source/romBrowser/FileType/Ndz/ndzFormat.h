@@ -18,6 +18,9 @@
 
 #define NDZ_OFFSET_DELTA_BASE_SIZE    0x2450
 #define NDZ_OFFSET_DELTA_BASE_HDRCRC  0x2454
+#define NDZ_OFFSET_DELTA_OPTIONS      0x2458
+#define NDZ_DELTA_OPT_BASE_BINARIES   (1u << 0)   // retired: the loader still honours it
+#define NDZ_DELTA_OPT_NTR_MODE        (1u << 1)
 #define NDZ_OFFSET_DELTA_NAME         0x2460
 #define NDZ_DELTA_NAME_LEN            64
 #define NDZ_OFFSET_DELTA_VERSION      0x24A0

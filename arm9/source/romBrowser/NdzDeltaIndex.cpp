@@ -15,6 +15,7 @@ namespace
         u16 hdrCrc;         // base: crc16 of its .nds header (0 on packs that predate the field)
         u32 baseSize;       // delta: size of the base .nds it was packed against
         u16 baseHdrCrc;     // delta: header crc16 of that base
+        u32 options;        // delta: NDZ_DELTA_OPT_*
         char name[NDZ_DELTA_NAME_LEN];
         char version[NDZ_DELTA_VERSION_LEN];
     };
@@ -42,6 +43,7 @@ namespace
         memcpy(&identity.hdrCrc, side + (NDZ_OFFSET_HDRCRC - NDZ_OFFSET_GAMECODE), 2);
         memcpy(&identity.baseSize, side + (NDZ_OFFSET_DELTA_BASE_SIZE - NDZ_OFFSET_GAMECODE), 4);
         memcpy(&identity.baseHdrCrc, side + (NDZ_OFFSET_DELTA_BASE_HDRCRC - NDZ_OFFSET_GAMECODE), 2);
+        memcpy(&identity.options, side + (NDZ_OFFSET_DELTA_OPTIONS - NDZ_OFFSET_GAMECODE), 4);
         memcpy(identity.name, side + (NDZ_OFFSET_DELTA_NAME - NDZ_OFFSET_GAMECODE), NDZ_DELTA_NAME_LEN);
         memcpy(identity.version, side + (NDZ_OFFSET_DELTA_VERSION - NDZ_OFFSET_GAMECODE), NDZ_DELTA_VERSION_LEN);
         // the packer zero-pads both; a foreign file must not run off the end
@@ -140,7 +142,17 @@ std::unique_ptr<NdzDeltaIndex> NdzDeltaIndex::Build(SdFolder& sdFolder)
         else
             mini_snprintf(label, sizeof(label), "%s", name);
         entry.label = label;
+        entry.ntrMode = (delta.identity.options & NDZ_DELTA_OPT_NTR_MODE) != 0;
         base->SetNdzHackCount(base->GetNdzHackCount() + 1);
     }
     return index;
+}
+
+void NdzDeltaIndex::SetNtrMode(const char* deltaFileName, bool on)
+{
+    for (u32 i = 0; i < _entryCount; i++)
+    {
+        if (strcmp(_entries[i].delta->GetFileName(), deltaFileName) == 0)
+            _entries[i].ntrMode = on;
+    }
 }

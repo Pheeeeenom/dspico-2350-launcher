@@ -10,6 +10,8 @@
 #include "cheats/UsrCheatRepositoryFactory.h"
 #include "cheats/EmptyCheatRepository.h"
 #include "cheats/PicoLoaderCheatDataFactory.h"
+#include "fat/File.h"
+#include "FileType/Ndz/ndzFormat.h"
 #include "RomBrowserController.h"
 
 RomBrowserController::RomBrowserController(
@@ -49,6 +51,41 @@ void RomBrowserController::ShowHackSelect(const FileInfo& base)
 void RomBrowserController::HideHackSelect()
 {
     _stateMachine.Fire(RomBrowserStateTrigger::HideHackSelect);
+}
+
+void RomBrowserController::SetHackNtrMode(const FileInfo& delta, bool on)
+{
+    if (_ndzDeltaIndex)
+        _ndzDeltaIndex->SetNtrMode(delta.GetFileName(), on);
+    // opened by path: a write closes through the directory entry, which the
+    // fast file ref lacks. The path is a member because an IO task slot is 32 bytes.
+    BuildCurrentFolderFilePath(delta.GetFileName(), _hackOptionPath,
+        sizeof(_hackOptionPath) / sizeof(_hackOptionPath[0]));
+    _hackOptionNtrMode = on;
+    _ioTaskQueue->Enqueue([this] (const vu8& cancelRequested)
+    {
+        auto file = std::make_unique<File>();
+        if (file->Open(_hackOptionPath, FA_READ | FA_WRITE) != FR_OK)
+        {
+            LOG_ERROR("Couldn't open %s to change its options\n", _hackOptionPath);
+            return TaskResult<void>::Completed();
+        }
+        u32 options = 0;
+        u32 written = 0;
+        if (file->Seek(NDZ_OFFSET_DELTA_OPTIONS) == FR_OK && file->ReadExact(&options, sizeof(options)))
+        {
+            options = _hackOptionNtrMode
+                ? (options | NDZ_DELTA_OPT_NTR_MODE)
+                : (options & ~NDZ_DELTA_OPT_NTR_MODE);
+            if (file->Seek(NDZ_OFFSET_DELTA_OPTIONS) != FR_OK
+                || file->Write(&options, sizeof(options), written) != FR_OK || written != sizeof(options))
+            {
+                LOG_ERROR("Couldn't write the options of %s\n", _hackOptionPath);
+            }
+        }
+        file->Close();
+        return TaskResult<void>::Completed();
+    });
 }
 
 void RomBrowserController::ShowGameInfo(const FileInfo& fileInfo)
