@@ -10,6 +10,7 @@ void ThreadIpcService::ThreadMain()
         {
             _messageValid = false;
             HandleMessage(_message);
+            _busy = false;
         }
     }
 }
@@ -28,6 +29,7 @@ void ThreadIpcService::Start()
 void ThreadIpcService::OnMessageReceived(u32 data)
 {
     _message = data;
+    _busy = true;
     _messageValid = true;
     rtos_signalEvent(&_event);
 }

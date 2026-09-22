@@ -11,6 +11,8 @@ class ThreadIpcService : public IpcService
     u32 _stackSize;
     u8 _priority;
     bool _messageValid = false;
+    /// @brief Set from message arrival until HandleMessage returns.
+    volatile bool _busy = false;
     u32 _message;
 
     void ThreadMain();
@@ -23,4 +25,7 @@ public:
     void OnMessageReceived(u32 data) override;
 
     virtual void HandleMessage(u32 data);
+
+    /// @brief Whether a message is waiting or being handled.
+    bool IsBusy() const { return _busy; }
 };

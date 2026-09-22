@@ -47,6 +47,11 @@ static rtos_event_t sVCountEvent;
 static ExitMode sExitMode;
 static Arm7State sState;
 static volatile u8 sMcuIrqFlag = false;
+/// @brief Frames in a row the lid has read closed.
+static u8 sLidClosedFrames = 0;
+static constexpr u8 LID_CLOSED_FRAMES = 6;
+/// @brief IE bit 22, lid opened.
+static constexpr u32 IRQ_LID_OPENED = 1 << 22;
 
 static void vcountIrq(u32 irqMask)
 {
@@ -56,6 +61,75 @@ static void vcountIrq(u32 irqMask)
 static void mcuIrq(u32 irq2Mask)
 {
     sMcuIrqFlag = true;
+}
+
+static void lidOpenedIrq(u32 irqMask)
+{
+    // nothing to do
+}
+
+/// @brief BIOS SleepMode, until an enabled irq is raised.
+__attribute__((target("arm"), noinline))
+static void swiSleep()
+{
+    asm volatile("swi #(7 << 16)" ::: "memory");
+}
+
+/// @brief Sleeps until the lid opens. A running SD request finishes first.
+static void sleepUntilLidOpened()
+{
+    // no request may start between the idle check and the sleep
+    u32 irqs = rtos_disableIrqs();
+    bool busy = sDldiIpcService.IsBusy() || (isDSiMode() && sDsiSdIpcService.IsBusy());
+    if (busy)
+    {
+        rtos_restoreIrqs(irqs);
+        return; // try again next frame
+    }
+
+    // sound and backlights off, power led breathing
+    snd_setMasterVolume(0);
+    u8 control = pmic_readRegister(PMIC_REG_CONTROL);
+    pmic_writeRegister(PMIC_REG_CONTROL,
+        (control & ~(PMIC_CONTROL_TOP_BACKLIGHT_ENABLE | PMIC_CONTROL_BOTTOM_BACKLIGHT_ENABLE
+            | PMIC_CONTROL_AMP_ENABLE | PMIC_CONTROL_POWER_LED_BLINK_MASK))
+        | PMIC_CONTROL_AMP_MUTE | PMIC_CONTROL_POWER_LED_BLINK_SLOW);
+
+    // only the lid wakes us; IE2 is left alone so the DSi power button still works
+    u32 savedIe = rtos_getIrqMask();
+    rtos_setIrqFunc(IRQ_LID_OPENED, lidOpenedIrq);
+    rtos_setIrqMask(IRQ_LID_OPENED);
+    rtos_ackIrqMask(IRQ_LID_OPENED);
+    do
+    {
+        swiSleep();
+    } while ((REG_RCNT0_H & RCNT0_H_DATA_LID) && !sMcuIrqFlag);
+    rtos_setIrqMask(savedIe);
+    rtos_setIrqFunc(IRQ_LID_OPENED, nullptr);
+
+    pmic_writeRegister(PMIC_REG_CONTROL, control);
+    snd_setMasterVolume(127);
+    sLidClosedFrames = 0;
+    rtos_restoreIrqs(irqs);
+}
+
+static void checkLid()
+{
+    if (REG_RCNT0_H & RCNT0_H_DATA_LID)
+    {
+        if (sLidClosedFrames < LID_CLOSED_FRAMES)
+        {
+            sLidClosedFrames++;
+        }
+        else
+        {
+            sleepUntilLidOpened();
+        }
+    }
+    else
+    {
+        sLidClosedFrames = 0;
+    }
 }
 
 static void checkMcuIrq(void)
@@ -165,6 +239,10 @@ static void updateArm7IdleState()
     else
     {
         checkMcuIrq();
+        if (sState == Arm7State::Idle)
+        {
+            checkLid();
+        }
     }
 
     if (sState == Arm7State::ExitRequested)

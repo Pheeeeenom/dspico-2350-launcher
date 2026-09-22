@@ -9,6 +9,7 @@
 - Support for custom folder covers via a cover.bmp file placed inside the folder - by @tasken
 - .ndz roms (compressed .nds for the DSpico IR) are listed and launched like .nds files
 - Rom hacks shipped as delta .ndz files: a base .ndz with hacks opens a version sheet; X flips a hack between NTR (DS) and TWL (DSi) mode
+- Closing the lid puts the launcher to sleep until it opens; on a DSi the power button still works while asleep
 
 ### Fixed
 - Top screen cover is now displayed/hidden correctly when placed partially or fully off-screen
