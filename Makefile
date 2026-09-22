@@ -5,7 +5,7 @@
 BLOCKSDS	?= /opt/blocksds/core
 BLOCKSDSEXT	?= /opt/blocksds/external
 
-export LIBTWL           ?= $(shell pwd)/libs/libtwl
+export LIBTWL           ?= libs/libtwl
 
 # User config
 # ===========

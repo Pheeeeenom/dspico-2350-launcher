@@ -5,7 +5,7 @@
 export BLOCKSDS			?= /opt/blocksds/core
 export BLOCKSDSEXT		?= /opt/blocksds/external
 
-export LIBTWL           ?= $(shell pwd)/libs/libtwl
+export LIBTWL           ?= libs/libtwl
 
 export WONDERFUL_TOOLCHAIN	?= /opt/wonderful
 ARM_NONE_EABI_PATH	?= $(WONDERFUL_TOOLCHAIN)/toolchain/gcc-arm-none-eabi/bin/
